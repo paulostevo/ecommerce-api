@@ -1,0 +1,24 @@
+{
+  "name": "ecommerce-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+ "scripts": {
+  "start": "node lib/index.js",
+  "watch": "tsc-watch --onSuccess \"npm run start\""
+}
+,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.8",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.12.0",
+    "tsc-watch": "^6.2.1",
+    "typescript": "^5.7.3"
+  }
+}
