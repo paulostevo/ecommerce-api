@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
- "scripts": {
-  "start": "node lib/index.js",
-  "watch": "tsc-watch --onSuccess \"npm run start\""
-}
-,
+  "scripts": {
+    "start": "node lib/index.js",
+    "watch": "tsc-watch --onSuccess \"npm run start\""
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.2"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase-admin": "^13.1.0"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.8",

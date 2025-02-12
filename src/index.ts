@@ -1,11 +1,14 @@
 import express from "express";
+import "dotenv/config";
+import { initializeApp } from 'firebase-admin/app';
 import {routes} from "./routes/index";
 
+initializeApp();
 const app = express();
 
 routes(app);
 
-app.listen(3000, ()=>{
-
-    console.log("Servidor ativo na porte 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
