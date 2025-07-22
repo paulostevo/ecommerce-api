@@ -1,5 +1,7 @@
-import { Request,Response } from "express";
+import { NextFunction, Request,Response } from "express";
 import {getFirestore} from "firebase-admin/firestore"
+import { ValidationError } from "../errors/validation.error";
+import { NotFoundError } from "../errors/not-found.error";
 
 // type User = {
 //     id:number;
@@ -8,8 +10,8 @@ import {getFirestore} from "firebase-admin/firestore"
 // };
 
 export class UsersController{
-    static async getAll(req: Request,res: Response){
-       try {
+    static async getAll(req: Request, res: Response, next: NextFunction){
+     
                 const snapshot = await getFirestore().collection("users").get();
                 const users = snapshot.docs.map( doc => {
                     
@@ -19,44 +21,30 @@ export class UsersController{
                 };
             })
             res.send(users);
-        
-       } catch (error) {
-       res.status(500).send({
-        message: "Erro Interno do Servidor"
-       });
-       }
     }
 
-    static async getById(req: Request,res: Response) {
-        try {
-            let userId =req.params.id;
+    static async getById(req: Request,res: Response, next: NextFunction) {
+         let userId =req.params.id;
             const doc = await getFirestore().collection("users").doc(userId).get();
-            res.send({
+            if(doc.exists){
+                 res.send({
                 id: doc.id,
-            ...doc.data()
+                 ...doc.data()
             });
-        } catch (error) {
-            res.status(500).send({
-             message: "Erro Interno do Servidor"
-        });
-    }}
+            }else{
+                throw new NotFoundError(`Usuário com id ${userId} não encontrado`);
+            }
+    }
 
-    static async save (req: Request,res: Response){
-        try {
+    static async save (req: Request,res: Response, next: NextFunction){
             let user = req.body;
+            
             const userSalvo = await getFirestore().collection("users").add(user);
              res.status(201).send({
             message: `Usuário ${userSalvo.id} criado com sucesso`});
-        } catch (error) {
-            res.status(500).send({
-                message: "Erro Interno do Servidor"
-            });  
-        }
-        
     }
 
-static async update(req: Request, res: Response): Promise<void> {
-        try {
+    static async update(req: Request, res: Response, next: NextFunction): Promise<void> {
             const userId = req.params.id;
             const user = req.body;
 
@@ -65,14 +53,10 @@ static async update(req: Request, res: Response): Promise<void> {
                 return;
             }
 
-            const userRef = getFirestore().collection("users").doc(userId);
+            const userRef = await getFirestore().collection("users").doc(userId);
             const doc = await userRef.get();
 
-            if (!doc.exists) {
-                res.status(404).json({ message: "Usuário não encontrado" });
-                return;
-            }
-
+            if(doc.exists){
             await userRef.update({
                 nome: user.nome,
                 email: user.email
@@ -82,23 +66,14 @@ static async update(req: Request, res: Response): Promise<void> {
                 message: "Usuário alterado com sucesso",
                 userId: userId
             });
-
-        } catch (error) {
-            console.error("Erro ao atualizar usuário:", error);
-            res.status(500).json({ message: "Erro Interno do Servidor" });
-        }
+            }else{
+                throw new NotFoundError(`Usuário com id ${userId} não encontrado`);
+            }
     }
 
-    static async delete (req: Request,res: Response){
-        try {
+    static async delete (req: Request,res: Response, next: NextFunction){
              let  userId = req.params.id;
-        await getFirestore().collection("users").doc(userId).delete();
-        res.status(204).send();
-        } catch (error) {
-            res.status(500).send({
-                message: "Erro Interno do Servidor"
-            }); 
-        }
-       
+             await getFirestore().collection("users").doc(userId).delete();
+             res.status(204).send();
     }
 }
