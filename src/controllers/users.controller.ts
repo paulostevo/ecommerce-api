@@ -1,74 +1,32 @@
 import { NextFunction, Request,Response } from "express";
-import {getFirestore} from "firebase-admin/firestore"
-import { NotFoundError } from "../errors/not-found.error";
-
-
+import { UserService } from "../Services/user.service";
 
 export class UsersController{
     static async getAll(req: Request, res: Response, next: NextFunction){
-     
-                const snapshot = await getFirestore().collection("users").get();
-                const users = snapshot.docs.map( doc => {
-                    
-                    return {
-                    id: doc.id,
-                    ...doc.data() 
-                };
-            })
-            res.send(users);
+            res.send(await new UserService().getAll());
     }
 
     static async getById(req: Request,res: Response, next: NextFunction) {
-         let userId =req.params.id;
-            const doc = await getFirestore().collection("users").doc(userId).get();
-            if(doc.exists){
-                 res.send({
-                id: doc.id,
-                 ...doc.data()
-            });
-            }else{
-                throw new NotFoundError(`Usuário com id ${userId} não encontrado`);
-            }
+        let userId = req.params.id;
+        res.send(await new UserService().getById(userId));
     }
 
     static async save (req: Request,res: Response, next: NextFunction){
-            let user = req.body;
-            
-            const userSalvo = await getFirestore().collection("users").add(user);
-             res.status(201).send({
-            message: `Usuário ${userSalvo.id} criado com sucesso`});
+            await new UserService().save(req.body);
+            res.status(201).send({
+            message: `Usuário criado com sucesso`});
     }
 
     static async update(req: Request, res: Response, next: NextFunction): Promise<void> {
             const userId = req.params.id;
             const user = req.body;
-
-            if (!userId) {
-                res.status(400).json({ message: "ID do usuário é obrigatório" });
-                return;
-            }
-
-            const userRef = await getFirestore().collection("users").doc(userId);
-            const doc = await userRef.get();
-
-            if(doc.exists){
-            await userRef.update({
-                nome: user.nome,
-                email: user.email
-            });
-
-            res.json({ 
-                message: "Usuário alterado com sucesso",
-                userId: userId
-            });
-            }else{
-                throw new NotFoundError(`Usuário com id ${userId} não encontrado`);
-            }
+            await new UserService().update(userId, user);
+            res.send({ message: `Usuário atualizado com sucesso` });
     }
 
     static async delete (req: Request,res: Response, next: NextFunction){
              let  userId = req.params.id;
-             await getFirestore().collection("users").doc(userId).delete();
+             await new UserService().delete(userId);
              res.status(204).send();
     }
 }

@@ -1,7 +1,7 @@
 import { Joi } from "celebrate";
 
 export type User = {
-    id:number;
+    id:string;
     nome: string;
     email: string;
 };
