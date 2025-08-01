@@ -31,12 +31,13 @@ export class UserRepository {
     }
 
     async save(user: User): Promise<void> {
+         delete user.password;
          await this.collection.add(user);
     }
 
     async update(user: User): Promise<void> {
         let docRef =  this.collection.doc(user.id);
-         await docRef.update({
+         await docRef.set({
                          nome: user.nome,
                          email: user.email
                         }); 

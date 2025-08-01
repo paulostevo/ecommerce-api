@@ -1,13 +1,16 @@
 import { User } from "../models/users.model";
 import { NotFoundError } from "../errors/not-found.error";
 import { UserRepository } from "../repositories/user.repository";
+import { AuthService } from "./auth.service";
 
 export class UserService {
 
     private userRepository: UserRepository;
+    private authService: AuthService;
 
     constructor() {
         this.userRepository = new UserRepository();
+        this.authService = new AuthService();
     }
 
     async getAll(): Promise<User[]> {
@@ -23,7 +26,9 @@ export class UserService {
     }
 
     async save(user: User): Promise<void> {
-         await this.userRepository.save(user);
+         const userAuth = await this.authService.create(user);
+         user.id = userAuth.uid; // Set the user ID from Firebase Auth
+         await this.userRepository.update(user);
     }
 
     async update(id: string, user: User): Promise<void>{
